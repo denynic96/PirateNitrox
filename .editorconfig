@@ -14,11 +14,11 @@ indent_size = 2
 insert_final_newline = true
 
 [App.config]
-indent_size = 4
+indent_size = 2
 insert_final_newline = true
 
 [*.cs]
-indent_size = 4
+indent_size = 2
 insert_final_newline = true
 charset = utf-8-bom
 
