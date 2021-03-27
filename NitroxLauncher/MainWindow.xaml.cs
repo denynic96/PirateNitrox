@@ -55,7 +55,8 @@ namespace NitroxLauncher
         // This pirate detection subscriber is immediately invoked if pirate has been detected right now.
         PirateDetection.PirateDetected += (o, eventArgs) =>
         {
-          Logo.Source = new BitmapImage(new Uri("pirateNitroxLogo.png", UriKind.Relative));
+          Logo.Margin = new Thickness(Logo.Margin.Left, Logo.Margin.Top / 2, Logo.Margin.Right, Logo.Margin.Bottom);
+          Logo.Text = "PIRATE\nNITROX";
         };
       };
 
