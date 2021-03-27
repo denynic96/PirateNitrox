@@ -185,8 +185,8 @@
           <RowDefinition Height="533" />
         </Grid.RowDefinitions>
         <!-- Make sure the navigation items align vertically with the "NITROX" header. -->
-        
-        <TextBlock x:Name="Logo" Margin="30, 16, 0, 0" VerticalAlignment="Top" HorizontalAlignment="Left" Text="NITROX" FontWeight="Bold" FontFamily="Arial" FontStyle="Italic" Foreground="White" FontSize="32"/>
+
+        <TextBlock Margin="30, 8, 0, 0" VerticalAlignment="Top" HorizontalAlignment="Left" FontWeight="Bold" FontFamily="Arial" FontStyle="Italic" Foreground="White" FontSize="32">PIRATE <LineBreak/> NITROX</TextBlock>
 
         <StackPanel Margin="32,82,0,286" x:Name="SideBarPanel" HorizontalAlignment="Left" Width="196">
           <Button Click="ButtonNavigation_Click" Tag="{StaticResource LaunchGamePage}" ToolTip="Play the game" BorderBrush="#00000000" >

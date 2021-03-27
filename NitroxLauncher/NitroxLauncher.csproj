@@ -236,9 +236,6 @@
     <None Include="Images\material-design-icons\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="nitroxLogo.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -280,9 +277,6 @@
     <PackageReference Include="WindowsAPICodePack-Shell">
       <Version>1.1.1</Version>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="pirateNitroxLogo.png" />
   </ItemGroup>
   <!-- Move assets from Subnautica assets to launcher.
        TODO: Try fix this as a project reference to Nitrox.Subnautica.Assets that will copy the files on build automatically. -->
