@@ -20,8 +20,9 @@ namespace NitroxLauncher
 {
   public class LauncherLogic : IDisposable, INotifyPropertyChanged
   {
+    private static App _app = Application.Current as App;
+
     public static string Version => Assembly.GetAssembly(typeof(Extensions)).GetName().Version.ToString();
-    public static LauncherLogic Instance { get; private set; }
 
     public const string RELEASE_PHASE = "ALPHA";
     private NitroxEntryPatch nitroxEntryPatch;
@@ -43,11 +44,6 @@ namespace NitroxLauncher
 
     public bool ServerRunning => !serverProcess?.HasExited ?? false;
 
-    public LauncherLogic()
-    {
-      Instance = this;
-    }
-
     public event EventHandler<ServerStartEventArgs> ServerStarted;
     public event DataReceivedEventHandler ServerDataReceived;
     public event EventHandler ServerExited;
@@ -57,12 +53,12 @@ namespace NitroxLauncher
       Application.Current.MainWindow?.Hide();
       if (isEmbedded)
       {
-        Instance.SendServerCommand("stop\n");
+        _app.LauncherLogic.SendServerCommand("stop\n");
       }
 
       try
       {
-        nitroxEntryPatch.Remove();
+        nitroxEntryPatch?.Remove();
       }
       catch (Exception)
       {
@@ -87,27 +83,6 @@ namespace NitroxLauncher
           // Ignore errors while writing to process
         }
       }
-    }
-
-    [Conditional("RELEASE")]
-    public async void CheckNitroxVersion()
-    {
-      await Task.Factory.StartNew(() =>
-      {
-        Version latestVersion = WebHelper.GetNitroxLatestVersion();
-        Version currentVersion = new Version(Version);
-
-        if (latestVersion > currentVersion)
-        {
-          MessageBox.Show($"A new version of the mod ({latestVersion}) is available !\n\nPlease check our website to download it",
-                    "New version available",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Question,
-                    MessageBoxResult.OK,
-                    MessageBoxOptions.DefaultDesktopOnly);
-        }
-
-      }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     public async Task<string> SetTargetedSubnauticaPath(string path)
@@ -141,38 +116,6 @@ namespace NitroxLauncher
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
-
-    public void NavigateTo(Type page)
-    {
-      if (page == null || !page.IsSubclassOf(typeof(Page)) && page != typeof(Page))
-      {
-        return;
-      }
-      if (ServerRunning && isEmbedded && page == typeof(ServerPage))
-      {
-        page = typeof(ServerConsolePage);
-      }
-
-      if (Application.Current.MainWindow != null)
-      {
-        ((MainWindow)Application.Current.MainWindow).FrameContent = Application.Current.FindResource(page.Name);
-      }
-    }
-
-    public void NavigateTo<TPage>() where TPage : Page
-    {
-      NavigateTo(typeof(TPage));
-    }
-
-    public bool NavigationIsOn<TPage>() where TPage : Page
-    {
-      MainWindow window = Application.Current.MainWindow as MainWindow;
-      if (window == null)
-      {
-        return false;
-      }
-      return window.FrameContent?.GetType() == typeof(TPage);
-    }
 
     public bool IsSubnauticaDirectory(string directory)
     {

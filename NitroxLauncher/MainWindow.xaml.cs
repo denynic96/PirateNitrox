@@ -5,69 +5,52 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using NitroxLauncher.AttachedProperties;
 using NitroxLauncher.Events;
 using NitroxLauncher.Pages;
-using NitroxLauncher.Patching;
 using NitroxModel.Discovery;
-using NitroxModel.Helper;
 
 namespace NitroxLauncher
 {
   public partial class MainWindow : Window, INotifyPropertyChanged
   {
-    private readonly LauncherLogic logic = new LauncherLogic();
-    private object frameContent;
+    private static App _app => Application.Current as App;
+
     private bool isServerEmbedded;
 
     public string Version => $"{LauncherLogic.RELEASE_PHASE} {LauncherLogic.Version}";
 
-    public object FrameContent
+    private Page _currentPage
     {
-      get => frameContent;
+      get => MainFrame.Content as Page;
       set
       {
-        frameContent = value;
-
-        // Update navigation buttons styling
-        foreach (Button button in SideBarPanel.GetChildrenOfType<Button>())
-        {
-          button.SetValue(ButtonProperties.SelectedProperty, button.Tag == value || button.Tag?.GetType() == typeof(ServerPage) && value?.GetType() == typeof(ServerConsolePage));
-        }
-
-        OnPropertyChanged();
-        OnPropertyChanged(nameof(CurrentPageBackground));
+        MainFrame.Content = value;
       }
     }
-
-    public ImageSource CurrentPageBackground => (ImageSource)(FrameContent as Page)?.Background.GetValue(ImageBrush.ImageSourceProperty);
 
     public MainWindow()
     {
       InitializeComponent();
 
-      logic.ServerStarted += ServerStarted;
-      logic.ServerExited += ServerExited;
+      _app.LauncherLogic.ServerStarted += ServerStarted;
+      _app.LauncherLogic.ServerExited += ServerExited;
 
-      logic.SetTargetedSubnauticaPath(GameInstallationFinder.Instance.FindGame())
-          .ContinueWith(task =>
-              {
-                if (logic.IsSubnauticaDirectory(task.Result))
-                {
-                  LauncherLogic.Instance.NavigateTo<LaunchGamePage>();
-                }
-                else
-                {
-                  LauncherLogic.Instance.NavigateTo<OptionPage>();
-                }
+      _app.LauncherLogic.SetTargetedSubnauticaPath(GameInstallationFinder.Instance.FindGame()).ContinueWith(task =>
+      {
+        if (_app.LauncherLogic.IsSubnauticaDirectory(task.Result))
+        {
+          _currentPage = _app.LaunchGamePage;
+        }
+        else
+        {
+          _currentPage = _app.OptionPage;
+        }
 
-                logic.CheckNitroxVersion();
-              },
-              CancellationToken.None,
-              TaskContinuationOptions.OnlyOnRanToCompletion,
-              TaskScheduler.FromCurrentSynchronizationContext());
+      },
+      CancellationToken.None,
+      TaskContinuationOptions.OnlyOnRanToCompletion,
+      TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -79,7 +62,7 @@ namespace NitroxLauncher
 
     private bool CanClose()
     {
-      if (logic.ServerRunning && isServerEmbedded)
+      if (_app.LauncherLogic.ServerRunning && isServerEmbedded)
       {
         MessageBoxResult userAnswer = MessageBox.Show("The embedded server is still running. Click yes to close.", "Close aborted", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         return userAnswer == MessageBoxResult.Yes;
@@ -95,7 +78,7 @@ namespace NitroxLauncher
         e.Cancel = true;
         return;
       }
-      logic.Dispose();
+      _app.LauncherLogic.Dispose();
     }
 
     private void Close_Click(object sender, RoutedEventArgs e)
@@ -114,7 +97,7 @@ namespace NitroxLauncher
 
       if (e.Embedded)
       {
-        LauncherLogic.Instance.NavigateTo<ServerConsolePage>();
+        _currentPage = _app.ServerConsolePage;
       }
     }
 
@@ -122,25 +105,24 @@ namespace NitroxLauncher
     {
       Dispatcher?.Invoke(() =>
       {
-        if (LauncherLogic.Instance.NavigationIsOn<ServerConsolePage>())
+        if (_currentPage is ServerConsolePage)
         {
-          LauncherLogic.Instance.NavigateTo<ServerPage>();
+          _currentPage = _app.ServerPage;
         }
       });
     }
 
-    private void ButtonNavigation_Click(object sender, RoutedEventArgs e)
+    private void LaunchGamePageButton_Click(object sender, RoutedEventArgs e)
     {
-      if (!(sender is FrameworkElement elem))
-      {
-        return;
-      }
-      LauncherLogic.Instance.NavigateTo(elem.Tag?.GetType());
+      _currentPage = _app.LaunchGamePage;
     }
-
-    private void PART_VerticalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void ServerPageButton_Click(object sender, RoutedEventArgs e)
     {
-
+      _currentPage = _app.ServerPage;
+    }
+    private void OptionPageButton_Click(object sender, RoutedEventArgs e)
+    {
+      _currentPage = _app.OptionPage;
     }
   }
 }
