@@ -221,7 +221,7 @@
           </StackPanel>
         </Grid>
         <Button
-        Grid.Column="1" Margin="5 0 0 5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="250"
+        Grid.Column="1" Margin="5 0 0 5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="250" MinHeight="85"
         ToolTip="Launch the game with multiplayer enabled."
         Background="#FF007BFF"
         Style="{StaticResource LargeButton}"
